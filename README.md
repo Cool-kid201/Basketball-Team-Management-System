@@ -112,7 +112,7 @@ BPG: 0.90
 
 
 Possible improvements for future versions:
- Add team roster limits
- Add multiple teams
- Add a graphical user interface
+ Add team roster limits,
+ add multiple teams and
+ add a graphical user interface
 
