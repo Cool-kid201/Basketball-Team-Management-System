@@ -1,6 +1,5 @@
 players = []
 
-
 from functools import wraps
 
 
@@ -9,148 +8,77 @@ def log_action(function):
     def wrapper(*args, **kwargs):
         print("\nAction:", function.__name__)
         return function(*args, **kwargs)
-
     return wrapper
 
 
 def player_required(function):
     @wraps(function)
     def wrapper(*args, **kwargs):
-        if len(players) == 0:
+        if not players:
             print("\nThere are no players on the team.")
-            return None
-
+            return
         return function(*args, **kwargs)
-
     return wrapper
 
 
 class Player:
-    def __init__(
-        self,
-        player_id: str,
-        name: str,
-        age: int,
-        position: str,
-        jersey_number: int
-    ):
+    def __init__(self, player_id: str, name: str, age: int, position: str,
+                 jersey_number: int):
         self.__player_id = player_id
         self.__name = name.strip()
         self.__age = age
         self.__position = position.strip()
         self.__jersey_number = jersey_number
-
-        self.__games = 0
-        self.__points = 0
-        self.__assists = 0
-        self.__rebounds = 0
-        self.__steals = 0
-        self.__blocks = 0
+        self.__games = self.__points = self.__assists = 0
+        self.__rebounds = self.__steals = self.__blocks = 0
 
     @property
-    def player_id(self) -> str:
-        return self.__player_id
+    def player_id(self): return self.__player_id
+    @property
+    def name(self): return self.__name
+    @property
+    def age(self): return self.__age
+    @property
+    def position(self): return self.__position
+    @property
+    def jersey_number(self): return self.__jersey_number
+    @property
+    def games(self): return self.__games
+    @property
+    def points(self): return self.__points
+    @property
+    def assists(self): return self.__assists
+    @property
+    def rebounds(self): return self.__rebounds
+    @property
+    def steals(self): return self.__steals
+    @property
+    def blocks(self): return self.__blocks
+
+    def _average(self, value):
+        return value / self.__games if self.__games else 0
 
     @property
-    def name(self) -> str:
-        return self.__name
-
+    def points_per_game(self): return self._average(self.__points)
     @property
-    def age(self) -> int:
-        return self.__age
-
+    def assists_per_game(self): return self._average(self.__assists)
     @property
-    def position(self) -> str:
-        return self.__position
-
+    def rebounds_per_game(self): return self._average(self.__rebounds)
     @property
-    def jersey_number(self) -> int:
-        return self.__jersey_number
-
+    def steals_per_game(self): return self._average(self.__steals)
     @property
-    def games(self) -> int:
-        return self.__games
+    def blocks_per_game(self): return self._average(self.__blocks)
 
-    @property
-    def points(self) -> int:
-        return self.__points
+    def update_profile(self, name=None, age=None, position=None, jersey_number=None):
+        if name is not None: self.__name = name.strip()
+        if age is not None: self.__age = age
+        if position is not None: self.__position = position.strip()
+        if jersey_number is not None: self.__jersey_number = jersey_number
 
-    @property
-    def assists(self) -> int:
-        return self.__assists
-
-    @property
-    def rebounds(self) -> int:
-        return self.__rebounds
-
-    @property
-    def steals(self) -> int:
-        return self.__steals
-
-    @property
-    def blocks(self) -> int:
-        return self.__blocks
-
-    @property
-    def points_per_game(self) -> float:
-        if self.__games == 0:
-            return 0
-        return self.__points / self.__games
-
-    @property
-    def assists_per_game(self) -> float:
-        if self.__games == 0:
-            return 0
-        return self.__assists / self.__games
-
-    @property
-    def rebounds_per_game(self) -> float:
-        if self.__games == 0:
-            return 0
-        return self.__rebounds / self.__games
-
-    @property
-    def steals_per_game(self) -> float:
-        if self.__games == 0:
-            return 0
-        return self.__steals / self.__games
-
-    @property
-    def blocks_per_game(self) -> float:
-        if self.__games == 0:
-            return 0
-        return self.__blocks / self.__games
-
-    def update_profile(
-        self,
-        name: str = None,
-        age: int = None,
-        position: str = None,
-        jersey_number: int = None
-    ) -> None:
-        if name is not None:
-            self.__name = name.strip()
-
-        if age is not None:
-            self.__age = age
-
-        if position is not None:
-            self.__position = position.strip()
-
-        if jersey_number is not None:
-            self.__jersey_number = jersey_number
-
-    def record_game(
-        self,
-        points: int,
-        assists: int,
-        rebounds: int,
-        steals: int,
-        blocks: int
-    ) -> None:
-        if points < 0 or assists < 0 or rebounds < 0 or steals < 0 or blocks < 0:
+    def record_game(self, points, assists, rebounds, steals, blocks):
+        values = (points, assists, rebounds, steals, blocks)
+        if any(value < 0 for value in values):
             raise ValueError("Player statistics cannot be negative.")
-
         self.__games += 1
         self.__points += points
         self.__assists += assists
@@ -158,300 +86,148 @@ class Player:
         self.__steals += steals
         self.__blocks += blocks
 
-    def __str__(self) -> str:
-        return (
-            f"#{self.__jersey_number} "
-            f"{self.__name} | "
-            f"{self.__position} | "
-            f"Age: {self.__age}"
-        )
+    def __str__(self):
+        return f"#{self.__jersey_number} {self.__name} | {self.__position} | Age: {self.__age}"
 
-    def __repr__(self) -> str:
-        return (
-            f"Player("
-            f"id={self.__player_id}, "
-            f"name='{self.__name}')"
-        )
+    def __repr__(self):
+        return f"Player(id='{self.__player_id}', name='{self.__name}')"
 
-    def __eq__(self, other) -> bool:
-        if not isinstance(other, Player):
-            return False
-        return self.__player_id == other.player_id
+    def __eq__(self, other):
+        return isinstance(other, Player) and self.__player_id == other.player_id
 
-    def __lt__(self, other) -> bool:
-        return self.__points < other.points
+    def __lt__(self, other): return self.__points < other.points
 
 
 class Team:
-    def __init__(self, name: str):
+    def __init__(self, name):
         self.name = name
-        self.__wins = 0
-        self.__losses = 0
+        self.__wins = self.__losses = 0
 
     @property
-    def wins(self) -> int:
-        return self.__wins
-
+    def wins(self): return self.__wins
     @property
-    def losses(self) -> int:
-        return self.__losses
-
+    def losses(self): return self.__losses
     @property
-    def games_played(self) -> int:
-        return self.__wins + self.__losses
-
+    def games_played(self): return self.__wins + self.__losses
     @property
-    def win_percentage(self) -> float:
-        if self.games_played == 0:
-            return 0
-        return (self.__wins / self.games_played) * 100
+    def win_percentage(self):
+        return self.__wins / self.games_played * 100 if self.games_played else 0
 
-    def record_win(self) -> None:
-        self.__wins += 1
-
-    def record_loss(self) -> None:
-        self.__losses += 1
-
-    def __len__(self) -> int:
-        return len(players)
-
-    def __iter__(self):
-        return self.player_generator()
-
-    def __contains__(self, player_id: str) -> bool:
-        for player in players:
-            if player.player_id == player_id:
-                return True
-        return False
-
-    def player_generator(self):
-        for player in players:
-            yield player
+    def record_win(self): self.__wins += 1
+    def record_loss(self): self.__losses += 1
+    def __len__(self): return len(players)
+    def __iter__(self): return iter(players)
+    def __contains__(self, player_id): return find_player(player_id) is not None
 
 
 class PlayerFactory:
-    """
-    Factory Design Pattern.
-
-    Instead of directly creating Player
-    objects everywhere, we use the factory.
-    """
-
     @staticmethod
-    def create_player(
-        player_id: str,
-        name: str,
-        age: int,
-        position: str,
-        jersey_number: int
-    ) -> Player:
-        return Player(
-            player_id,
-            name,
-            age,
-            position,
-            jersey_number
-        )
+    def create_player(player_id, name, age, position, jersey_number):
+        return Player(player_id, name, age, position, jersey_number)
 
 
 class PlayerProxy:
-    """
-    The proxy controls access to a Player.
-    """
+    def __init__(self, player): self.__player = player
 
-    def __init__(self, player: Player):
-        self.__player = player
-
-    def show_details(self) -> None:
+    def show_details(self):
+        p = self.__player
         print("\nPlayer Details")
-        print(f"ID: {self.__player.player_id}")
-        print(f"Name: {self.__player.name}")
-        print(f"Age: {self.__player.age}")
-        print(f"Position: {self.__player.position}")
-        print(f"Jersey Number: {self.__player.jersey_number}")
-        print(f"Games: {self.__player.games}")
-        print(f"Points: {self.__player.points}")
-        print(f"Assists: {self.__player.assists}")
-        print(f"Rebounds: {self.__player.rebounds}")
-        print(f"Steals: {self.__player.steals}")
-        print(f"Blocks: {self.__player.blocks}")
+        for label, value in (("ID", p.player_id), ("Name", p.name), ("Age", p.age),
+                             ("Position", p.position), ("Jersey Number", p.jersey_number),
+                             ("Games", p.games), ("Points", p.points),
+                             ("Assists", p.assists), ("Rebounds", p.rebounds),
+                             ("Steals", p.steals), ("Blocks", p.blocks)):
+            print(f"{label}: {value}")
 
 
 class Statistics:
-    def __init__(self, team: Team):
-        self.team = team
+    def __init__(self, team): self.team = team
 
-    def team_overview(self) -> None:
-        total_points = 0
-        total_assists = 0
-        total_rebounds = 0
-        total_steals = 0
-        total_blocks = 0
-
-        for player in self.team:
-            total_points += player.points
-            total_assists += player.assists
-            total_rebounds += player.rebounds
-            total_steals += player.steals
-            total_blocks += player.blocks
-
+    def team_overview(self):
+        totals = {key: sum(getattr(p, key) for p in self.team)
+                  for key in ("points", "assists", "rebounds", "steals", "blocks")}
         print("\nTeam Overview")
-        print(f"Team: {self.team.name}")
-        print(f"Players: {len(self.team)}")
+        print(f"Team: {self.team.name}\nPlayers: {len(self.team)}")
         print(f"Games Played: {self.team.games_played}")
-        print(f"Points: {total_points}")
-        print(f"Assists: {total_assists}")
-        print(f"Rebounds: {total_rebounds}")
-        print(f"Steals: {total_steals}")
-        print(f"Blocks: {total_blocks}")
+        for key, value in totals.items(): print(f"{key.title()}: {value}")
 
-    def get_leader(self, statistic: str):
-        current_players = list(self.team)
-        if not current_players:
-            return None
+    def get_leader(self, statistic):
+        return max(self.team, key=lambda p: getattr(p, statistic), default=None)
 
-        leader = current_players[0]
-        for player in current_players[1:]:
-            if getattr(player, statistic) > getattr(leader, statistic):
-                leader = player
-        return leader
+    def leader(self, statistic, title, unit):
+        player = self.get_leader(statistic)
+        print(f"\n{title}")
+        if player: print(f"{player.name}: {getattr(player, statistic)} {unit}")
 
-    def scoring_leader(self) -> None:
-        player = self.get_leader("points")
-        print("\nScoring Leader")
-        if player:
-            print(f"{player.name}: {player.points} points")
+    def scoring_leader(self): self.leader("points", "Scoring Leader", "points")
+    def assist_leader(self): self.leader("assists", "Assist Leader", "assists")
+    def rebound_leader(self): self.leader("rebounds", "Rebound Leader", "rebounds")
+    def steals_leader(self): self.leader("steals", "Steals Leader", "steals")
+    def blocks_leader(self): self.leader("blocks", "Blocks Leader", "blocks")
 
-    def assist_leader(self) -> None:
-        player = self.get_leader("assists")
-        print("\nAssist Leader")
-        if player:
-            print(f"{player.name}: {player.assists} assists")
+    def top_3(self, statistic, title, unit):
+        print(f"\n{title}")
+        ordered = sorted(self.team, key=lambda p: getattr(p, statistic), reverse=True)
+        for number, player in enumerate(ordered[:3], 1):
+            print(f"{number}. {player.name} - {getattr(player, statistic)} {unit}")
 
-    def rebound_leader(self) -> None:
-        player = self.get_leader("rebounds")
-        print("\nRebound Leader")
-        if player:
-            print(f"{player.name}: {player.rebounds} rebounds")
+    def top_3_scorers(self): self.top_3("points", "Top 3 Scorers", "points")
+    def top_3_assist_leaders(self): self.top_3("assists", "Top 3 Assist Leaders", "assists")
 
-    def steals_leader(self) -> None:
-        player = self.get_leader("steals")
-        print("\nSteals Leader")
-        if player:
-            print(f"{player.name}: {player.steals} steals")
-
-    def blocks_leader(self) -> None:
-        player = self.get_leader("blocks")
-        print("\nBlocks Leader")
-        if player:
-            print(f"{player.name}: {player.blocks} blocks")
-
-    def top_3_scorers(self) -> None:
-        sorted_players = sorted(players, key=lambda player: player.points, reverse=True)
-        print("\nTop 3 Scorers")
-        for index, player in enumerate(sorted_players[:3], start=1):
-            print(f"{index}. {player.name} - {player.points} points")
-
-    def top_3_assist_leaders(self) -> None:
-        sorted_players = sorted(players, key=lambda player: player.assists, reverse=True)
-        print("\nTop 3 Assist Leaders")
-        for index, player in enumerate(sorted_players[:3], start=1):
-            print(f"{index}. {player.name} - {player.assists} assists")
-
-    def player_averages(self) -> None:
+    def player_averages(self):
         print("\nPlayer Averages")
-        for player in self.team:
-            print(f"\n{player.name}")
-            print(f"PPG: {player.points_per_game:.2f}")
-            print(f"APG: {player.assists_per_game:.2f}")
-            print(f"RPG: {player.rebounds_per_game:.2f}")
-            print(f"SPG: {player.steals_per_game:.2f}")
-            print(f"BPG: {player.blocks_per_game:.2f}")
+        for p in self.team:
+            print(f"\n{p.name}\nPPG: {p.points_per_game:.2f}\nAPG: {p.assists_per_game:.2f}\n"
+                  f"RPG: {p.rebounds_per_game:.2f}\nSPG: {p.steals_per_game:.2f}\nBPG: {p.blocks_per_game:.2f}")
 
-    def player_statistics(self) -> None:
-        player_id = input("Enter player ID: ").strip().upper()
+    def player_statistics(self):
+        player_id = input("Enter player ID (for example, PLAYER01): ").strip().upper()
         player = find_player(player_id)
+        if player is None: print("Player not found.")
+        else: PlayerProxy(player).show_details()
 
-        if player is None:
-            print("Player not found.")
-            return
+    def team_record(self):
+        print(f"\nTeam Record\nWins: {self.team.wins}\nLosses: {self.team.losses}\n"
+              f"Games Played: {self.team.games_played}\nWin Percentage: {self.team.win_percentage:.2f}%")
 
-        proxy = PlayerProxy(player)
-        proxy.show_details()
-
-    def team_record(self) -> None:
-        print("\nTeam Record")
-        print(f"Wins: {self.team.wins}")
-        print(f"Losses: {self.team.losses}")
-        print(f"Games Played: {self.team.games_played}")
-        print(f"Win Percentage: {self.team.win_percentage:.2f}%")
-
-    def menu(self) -> None:
+    def menu(self):
+        actions = {"1": self.team_overview, "2": self.scoring_leader,
+                   "3": self.assist_leader, "4": self.rebound_leader,
+                   "5": self.steals_leader, "6": self.blocks_leader,
+                   "7": self.top_3_scorers, "8": self.top_3_assist_leaders,
+                   "9": self.player_averages, "10": self.player_statistics,
+                   "11": self.team_record}
         while True:
-            print("\nStatistics")
-            print("1. Team Overview")
-            print("2. Scoring Leader")
-            print("3. Assist Leader")
-            print("4. Rebound Leader")
-            print("5. Steals Leader")
-            print("6. Blocks Leader")
-            print("7. Top 3 Scorers")
-            print("8. Top 3 Assist Leaders")
-            print("9. Player Averages")
-            print("10. Player Statistics")
-            print("11. Team Record")
-            print("12. Back")
-
+            print("\nStatistics\n1. Team Overview\n2. Scoring Leader\n3. Assist Leader\n"
+                  "4. Rebound Leader\n5. Steals Leader\n6. Blocks Leader\n7. Top 3 Scorers\n"
+                  "8. Top 3 Assist Leaders\n9. Player Averages\n10. Player Statistics\n"
+                  "11. Team Record\n12. Back")
             choice = input("\nChoose an option: ")
-
-            if choice == "1":
-                self.team_overview()
-            elif choice == "2":
-                self.scoring_leader()
-            elif choice == "3":
-                self.assist_leader()
-            elif choice == "4":
-                self.rebound_leader()
-            elif choice == "5":
-                self.steals_leader()
-            elif choice == "6":
-                self.blocks_leader()
-            elif choice == "7":
-                self.top_3_scorers()
-            elif choice == "8":
-                self.top_3_assist_leaders()
-            elif choice == "9":
-                self.player_averages()
-            elif choice == "10":
-                self.player_statistics()
-            elif choice == "11":
-                self.team_record()
-            elif choice == "12":
-                break
-            else:
-                print("Invalid option.")
+            if choice == "12": return
+            if choice in actions: actions[choice]()
+            else: print("Invalid option.")
 
 
-def get_integer(prompt: str) -> int:
+def get_integer(prompt):
     while True:
-        try:
-            return int(input(prompt))
-        except ValueError:
-            print("Please enter a valid number.")
+        try: return int(input(prompt))
+        except ValueError: print("Please enter a valid number.")
 
 
-def find_player(player_id: str):
-    for player in players:
-        if player.player_id == player_id:
-            return player
-    return None
+def find_player(player_id):
+    player_id = str(player_id).strip().upper()
+    return next((p for p in players if p.player_id == player_id), None)
+
+
+def next_player_id():
+    """Return the next sequential ID: PLAYER01, PLAYER02, and so on."""
+    return f"PLAYER{len(players) + 1:02d}"
 
 
 @log_action
-def add_player(team: Team) -> None:
+def add_player(team):
     print("\nAdd Player")
-
-    player_id = f"PLAYER{len(players) + 1:02d}"
+    player_id = next_player_id()
     print(f"Generated Player ID: {player_id}")
 
     name = input("Name: ").strip()
@@ -461,8 +237,10 @@ def add_player(team: Team) -> None:
 
     while True:
         age = get_integer("Age: ")
-        if age < 18 or age > 42:
-            print("Invalid age. Player must be 18 or older and 42 or younger.")
+        if age < 18:
+            print("Invalid age. Player must be 18 or older.")
+        elif age > 42:
+            print("Invalid Age. Player must be 42 or younger.")
         else:
             break
 
@@ -475,153 +253,91 @@ def add_player(team: Team) -> None:
     if jersey_number <= 0:
         print("Jersey number must be positive.")
         return
+    if any(p.jersey_number == jersey_number for p in players):
+        print("That jersey number is already being used.")
+        return
 
-    for player in players:
-        if player.jersey_number == jersey_number:
-            print("That jersey number is already being used.")
-            return
-
-    player = PlayerFactory.create_player(player_id, name, age, position, jersey_number)
-    players.append(player)
-    print(f"{player.name} was added successfully.")
+    players.append(PlayerFactory.create_player(player_id, name, age, position, jersey_number))
+    print(f"{name} was added successfully with ID {player_id}.")
 
 
 @player_required
-def view_players(team: Team) -> None:
+def view_players(team):
     print("\nTeam Players")
-    for player in team:
-        print(f"ID: {player.player_id} | {player}")
+    for player in team: print(f"ID: {player.player_id} | {player}")
 
 
 @player_required
-def record_game(team: Team) -> None:
+def record_game(team):
     print("\nRecord Game")
-
-    result = input("Did the team win? (y/n): ").lower()
-    if result == "y":
-        team.record_win()
-    elif result == "n":
-        team.record_loss()
+    result = input("Did the team win? (y/n): ").lower().strip()
+    if result == "y": team.record_win()
+    elif result == "n": team.record_loss()
     else:
         print("Invalid result.")
         return
-
     for player in team:
         print(f"\n{player.name}")
-        points = get_integer("Points: ")
-        assists = get_integer("Assists: ")
-        rebounds = get_integer("Rebounds: ")
-        steals = get_integer("Steals: ")
-        blocks = get_integer("Blocks: ")
-
-        try:
-            player.record_game(points, assists, rebounds, steals, blocks)
-        except ValueError as exc:
-            print(exc)
+        values = [get_integer(label) for label in ("Points: ", "Assists: ", "Rebounds: ", "Steals: ", "Blocks: ")]
+        try: player.record_game(*values)
+        except ValueError as error:
+            print(error)
             return
-
     print("\nGame recorded successfully.")
 
 
 @player_required
-def search_players(team: Team) -> None:
+def search_players(team):
     search = input("\nSearch name or position: ").lower().strip()
     found = False
-
     for player in team:
         if search in player.name.lower() or search in player.position.lower():
             print(player)
             found = True
-
-    if not found:
-        print("No players found.")
+    if not found: print("No players found.")
 
 
 @player_required
-def edit_player(team: Team) -> None:
-    player_id = input("\nEnter player ID: ").strip().upper()
+def edit_player(team):
+    player_id = input("\nEnter player ID (for example, PLAYER01): ").strip().upper()
     player = find_player(player_id)
-
     if player is None:
         print("Player not found.")
         return
-
-    print("\n1. Edit Name")
-    print("2. Edit Age")
-    print("3. Edit Position")
-    print("4. Edit Jersey Number")
-    print("5. Back")
-
+    print("\n1. Edit Name\n2. Edit Age\n3. Edit Position\n4. Edit Jersey Number\n5. Back")
     choice = input("\nChoose an option: ")
-
     if choice == "1":
         name = input("New name: ").strip()
-        if not name:
-            print("Name cannot be empty.")
-            return
-        player.update_profile(name=name)
-
+        if not name: print("Name cannot be empty.")
+        else: player.update_profile(name=name)
     elif choice == "2":
         age = get_integer("New age: ")
-        if age < 18 or age > 42:
-            print("Invalid age. Player must be 18 or younger.")
-            return
-        player.update_profile(age=age)
-
+        if age < 18: print("Invalid age. Player must be 18 or older.")
+        elif age > 42: print("Invalid Age. Player must be 42 or younger.")
+        else: player.update_profile(age=age)
     elif choice == "3":
         position = input("New position: ").strip()
-        if not position:
-            print("Position cannot be empty.")
-            return
-        player.update_profile(position=position)
-
+        if not position: print("Position cannot be empty.")
+        else: player.update_profile(position=position)
     elif choice == "4":
         jersey_number = get_integer("New jersey number: ")
-        if jersey_number <= 0:
-            print("Jersey number must be positive.")
-            return
-        for existing_player in players:
-            if existing_player.player_id != player.player_id and existing_player.jersey_number == jersey_number:
-                print("That jersey number is already being used.")
-                return
-        player.update_profile(jersey_number=jersey_number)
-
-    elif choice == "5":
-        return
-
-    else:
-        print("Invalid option.")
+        if jersey_number <= 0: print("Jersey number must be positive.")
+        elif any(p.player_id != player.player_id and p.jersey_number == jersey_number for p in players):
+            print("That jersey number is already being used.")
+        else: player.update_profile(jersey_number=jersey_number)
+    elif choice != "5": print("Invalid option.")
 
 
 if __name__ == "__main__":
     team = Team("Basketball Team")
     stats = Statistics(team)
-
+    actions = {"1": lambda: add_player(team), "2": lambda: view_players(team),
+               "3": lambda: record_game(team), "4": lambda: search_players(team),
+               "5": lambda: edit_player(team), "6": stats.menu}
     while True:
-        print("\nMenu")
-        print("1. Add Player")
-        print("2. View Players")
-        print("3. Record Game")
-        print("4. Search Players")
-        print("5. Edit Player")
-        print("6. Statistics")
-        print("7. Exit")
-
+        print("\nMenu\n1. Add Player\n2. View Players\n3. Record Game\n4. Search Players\n"
+              "5. Edit Player\n6. Statistics\n7. Exit")
         choice = input("\nChoose an option: ")
-
-        if choice == "1":
-            add_player(team)
-        elif choice == "2":
-            view_players(team)
-        elif choice == "3":
-            record_game(team)
-        elif choice == "4":
-            search_players(team)
-        elif choice == "5":
-            edit_player(team)
-        elif choice == "6":
-            stats.menu()
-        elif choice == "7":
-            break
-        else:
-            print("Invalid option.")
+        if choice == "7": break
+        if choice in actions: actions[choice]()
+        else: print("Invalid option.")
