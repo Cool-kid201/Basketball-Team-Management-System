@@ -27,14 +27,16 @@ def player_required(function):
 
 
 class Player:
-    def __init__(self, player_id, name, age, position, jersey_number):
+    def __init__(self, player_id, name, age, position, jersey_number, notes=""):
         self.__player_id = player_id
         self.__name = name.strip()
         self.__age = age
         self.__position = position.strip()
         self.__jersey_number = jersey_number
+        self.__notes = notes.strip()
         self.__games = self.__points = self.__assists = 0
         self.__rebounds = self.__steals = self.__blocks = 0
+        self.__game_notes = []
 
     @property
     def player_id(self): return self.__player_id
@@ -47,6 +49,8 @@ class Player:
     @property
     def jersey_number(self): return self.__jersey_number
     @property
+    def notes(self): return self.__notes
+    @property
     def games(self): return self.__games
     @property
     def points(self): return self.__points
@@ -58,6 +62,8 @@ class Player:
     def steals(self): return self.__steals
     @property
     def blocks(self): return self.__blocks
+    @property
+    def game_notes(self): return self.__game_notes
 
     def set_player_id(self, player_id):
         self.__player_id = player_id
@@ -76,13 +82,14 @@ class Player:
     @property
     def blocks_per_game(self): return self.average(self.__blocks)
 
-    def update_profile(self, name=None, age=None, position=None, jersey_number=None):
+    def update_profile(self, name=None, age=None, position=None, jersey_number=None, notes=None):
         if name is not None: self.__name = name.strip()
         if age is not None: self.__age = age
         if position is not None: self.__position = position.strip()
         if jersey_number is not None: self.__jersey_number = jersey_number
+        if notes is not None: self.__notes = notes.strip()
 
-    def record_game(self, points, assists, rebounds, steals, blocks):
+    def record_game(self, points, assists, rebounds, steals, blocks, notes=""):
         values = (points, assists, rebounds, steals, blocks)
         if any(value < 0 for value in values):
             raise ValueError("Player statistics cannot be negative.")
@@ -92,6 +99,7 @@ class Player:
         self.__rebounds += rebounds
         self.__steals += steals
         self.__blocks += blocks
+        self.__game_notes.append(notes.strip())
 
     def __str__(self):
         return f"#{self.__jersey_number} {self.__name} | {self.__position} | Age: {self.__age}"
@@ -118,7 +126,7 @@ class Team:
     @property
     def game_stats(self): return self.__game_stats
 
-    def record_game(self, result, team_score, opponent_score, assists, rebounds, steals, blocks):
+    def record_game(self, result, team_score, opponent_score, assists, rebounds, steals, blocks, notes=""):
         values = (team_score, opponent_score, assists, rebounds, steals, blocks)
         if any(value < 0 for value in values):
             raise ValueError("Team statistics cannot be negative.")
@@ -132,6 +140,7 @@ class Team:
             "steals": steals,
             "blocks": blocks,
             "result": "Win" if result == "y" else "Loss",
+            "notes": notes.strip(),
         })
 
     def total_stat(self, statistic):
@@ -143,8 +152,8 @@ class Team:
 
 class PlayerFactory:
     @staticmethod
-    def create_player(player_id, name, age, position, jersey_number):
-        return Player(player_id, name, age, position, jersey_number)
+    def create_player(player_id, name, age, position, jersey_number, notes=""):
+        return Player(player_id, name, age, position, jersey_number, notes)
 
 
 class PlayerProxy:
@@ -156,8 +165,8 @@ class PlayerProxy:
         for label, value in (
             ("ID", player.player_id), ("Name", player.name),
             ("Age", player.age), ("Position", player.position),
-            ("Jersey Number", player.jersey_number), ("Games", player.games),
-            ("Total Points", player.points),
+            ("Jersey Number", player.jersey_number), ("Notes", player.notes),
+            ("Games", player.games), ("Total Points", player.points),
             ("Average Points Per Game", f"{player.points_per_game:.2f}"),
             ("Total Assists", player.assists),
             ("Average Assists Per Game", f"{player.assists_per_game:.2f}"),
@@ -168,6 +177,10 @@ class PlayerProxy:
             ("Total Blocks", player.blocks),
             ("Average Blocks Per Game", f"{player.blocks_per_game:.2f}")):
             print(f"{label}: {value}")
+        if player.game_notes:
+            print("Player Statistic Notes:")
+            for number, note in enumerate(player.game_notes, 1):
+                print(f"  Game {number}: {note or '(none)'}")
 
 
 class Statistics:
@@ -197,6 +210,7 @@ class Statistics:
             print(f"Rebounds: {game['rebounds']}")
             print(f"Steals: {game['steals']}")
             print(f"Blocks: {game['blocks']}")
+            print(f"Notes: {game['notes'] or '(none)'}")
 
     def get_leader(self, statistic):
         return max(self.team, key=lambda p: getattr(p, statistic), default=None)
@@ -310,7 +324,8 @@ def add_player(team):
         print("That jersey number is already being used.")
         return
 
-    players.append(PlayerFactory.create_player(player_id, name, age, position, jersey_number))
+    notes = input("Notes (optional): ").strip()
+    players.append(PlayerFactory.create_player(player_id, name, age, position, jersey_number, notes))
     print(f"{name} was added successfully with ID {player_id}.")
 
 
@@ -355,6 +370,7 @@ def record_game(team):
     opponent_score = get_integer("Opponent score: ")
     team_values = [get_integer(label) for label in (
         "Team assists: ", "Team rebounds: ", "Team steals: ", "Team blocks: ")]
+    team_notes = input("Team statistics notes (optional): ").strip()
 
     entered_values = [team_score, opponent_score] + team_values
     if any(value < 0 for value in entered_values):
@@ -365,14 +381,15 @@ def record_game(team):
     for player in team:
         print(f"\n{player.name}")
         values = [get_integer(label) for label in ("Points: ", "Assists: ", "Rebounds: ", "Steals: ", "Blocks: ")]
+        player_notes = input("Player statistics notes (optional): ").strip()
         if any(value < 0 for value in values):
             print("Player statistics cannot be negative.")
             return
-        player_values.append((player, values))
+        player_values.append((player, values, player_notes))
 
-    team.record_game(result, team_score, opponent_score, *team_values)
-    for player, values in player_values:
-        player.record_game(*values)
+    team.record_game(result, team_score, opponent_score, *team_values, team_notes)
+    for player, values, player_notes in player_values:
+        player.record_game(*values, player_notes)
     print("\nGame recorded successfully.")
 
 
@@ -391,7 +408,7 @@ def edit_player(team):
     if player is None:
         print("Player not found.")
         return
-    print("\n1. Edit Name\n2. Edit Age\n3. Edit Position\n4. Edit Jersey Number\n5. Back")
+    print("\n1. Edit Name\n2. Edit Age\n3. Edit Position\n4. Edit Jersey Number\n5. Edit Notes\n6. Back")
     choice = input("\nChoose an option: ")
     if choice == "1":
         name = input("New name: ").strip()
@@ -411,7 +428,10 @@ def edit_player(team):
         if jersey <= 0: print("Jersey number must be positive.")
         elif any(p != player and p.jersey_number == jersey for p in players): print("That jersey number is already being used.")
         else: player.update_profile(jersey_number=jersey)
-    elif choice != "5": print("Invalid option.")
+    elif choice == "5":
+        player.update_profile(notes=input("New notes: "))
+        print("Player notes updated.")
+    elif choice != "6": print("Invalid option.")
 
 
 if __name__ == "__main__":
