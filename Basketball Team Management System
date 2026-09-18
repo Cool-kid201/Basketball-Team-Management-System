@@ -1,4 +1,4 @@
-players = []
+players=[]
 from functools import wraps
 
 
@@ -305,7 +305,7 @@ if __name__ == "__main__":
     actions = {"1": lambda: add_player(team), "2": lambda: view_players(team), "3": lambda: record_game(team),
                "4": lambda: search_players(team), "5": lambda: edit_player(team), "6": stats.menu, "7": lambda: delete_player(team)}
     while True:
-        print("\nMenu\n1. Add Player\n2. View Players\n3. Record Game\n4. Search Players\n5. Edit Player\n6. Statistics\n7. Delete Player\n8. Exit")
+        print("\nBasketball Player Management System-Menu\n1. Add Player\n2. View Players\n3. Record Game\n4. Search Players\n5. Edit Player\n6. Statistics\n7. Delete Player\n8. Exit")
         choice = input("\nChoose an option: ")
         if choice == "8": print("\nThank you soo much for using Basketball Team Management System."); break
         if choice in actions: actions[choice]()
