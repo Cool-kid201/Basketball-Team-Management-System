@@ -366,7 +366,7 @@ if __name__ == "__main__":
         print("5. Edit Player\n6. Statistics\n7. Delete Player\n8. Exit")
         choice = input("\nChoose an option: ")
         if choice == "8":
-            print("\nThank you for using Basketball Team Management System.")
+            print("\nThank you soo much for using Basketball Team Management System.")
             break
         if choice in actions: actions[choice]()
         else: print("Invalid option.")
