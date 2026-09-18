@@ -28,7 +28,7 @@ def player_required(function):
 class Player:
     def __init__(
         self,
-        player_id: int,
+        player_id: str,
         name: str,
         age: int,
         position: str,
@@ -48,7 +48,7 @@ class Player:
         self.__blocks = 0
 
     @property
-    def player_id(self) -> int:
+    def player_id(self) -> str:
         return self.__player_id
 
     @property
@@ -218,7 +218,7 @@ class Team:
     def __iter__(self):
         return self.player_generator()
 
-    def __contains__(self, player_id: int) -> bool:
+    def __contains__(self, player_id: str) -> bool:
         for player in players:
             if player.player_id == player_id:
                 return True
@@ -239,7 +239,7 @@ class PlayerFactory:
 
     @staticmethod
     def create_player(
-        player_id: int,
+        player_id: str,
         name: str,
         age: int,
         position: str,
@@ -369,7 +369,7 @@ class Statistics:
             print(f"BPG: {player.blocks_per_game:.2f}")
 
     def player_statistics(self) -> None:
-        player_id = get_integer("Enter player ID: ")
+        player_id = input("Enter player ID: ").strip().upper()
         player = find_player(player_id)
 
         if player is None:
@@ -440,7 +440,7 @@ def get_integer(prompt: str) -> int:
             print("Please enter a valid number.")
 
 
-def find_player(player_id: int):
+def find_player(player_id: str):
     for player in players:
         if player.player_id == player_id:
             return player
@@ -451,10 +451,8 @@ def find_player(player_id: int):
 def add_player(team: Team) -> None:
     print("\nAdd Player")
 
-    player_id = get_integer("Player ID: ")
-    if player_id in team:
-        print("That player ID already exists.")
-        return
+    player_id = f"PLAYER{len(players) + 1:02d}"
+    print(f"Generated Player ID: {player_id}")
 
     name = input("Name: ").strip()
     if not name:
@@ -463,8 +461,8 @@ def add_player(team: Team) -> None:
 
     while True:
         age = get_integer("Age: ")
-        if age < 18:
-            print("Invalid age. Player must be 18 or older.")
+        if age < 18 or age > 42:
+            print("Invalid age. Player must be 18 or older and 42 or younger.")
         else:
             break
 
@@ -541,7 +539,7 @@ def search_players(team: Team) -> None:
 
 @player_required
 def edit_player(team: Team) -> None:
-    player_id = get_integer("\nEnter player ID: ")
+    player_id = input("\nEnter player ID: ").strip().upper()
     player = find_player(player_id)
 
     if player is None:
@@ -565,8 +563,8 @@ def edit_player(team: Team) -> None:
 
     elif choice == "2":
         age = get_integer("New age: ")
-        if age < 18:
-            print("Invalid age. Player must be 18 or older.")
+        if age < 18 or age > 42:
+            print("Invalid age. Player must be 18 or younger.")
             return
         player.update_profile(age=age)
 
