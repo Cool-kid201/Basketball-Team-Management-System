@@ -104,6 +104,7 @@ class Team:
     def __init__(self, name):
         self.name = name
         self.__wins = self.__losses = 0
+        self.__game_stats = []
 
     @property
     def wins(self): return self.__wins
@@ -114,9 +115,28 @@ class Team:
     @property
     def win_percentage(self):
         return self.__wins / self.games_played * 100 if self.games_played else 0
+    @property
+    def game_stats(self): return self.__game_stats
 
-    def record_win(self): self.__wins += 1
-    def record_loss(self): self.__losses += 1
+    def record_game(self, result, team_score, opponent_score, assists, rebounds, steals, blocks):
+        values = (team_score, opponent_score, assists, rebounds, steals, blocks)
+        if any(value < 0 for value in values):
+            raise ValueError("Team statistics cannot be negative.")
+        if result == "y": self.__wins += 1
+        else: self.__losses += 1
+        self.__game_stats.append({
+            "team_score": team_score,
+            "opponent_score": opponent_score,
+            "assists": assists,
+            "rebounds": rebounds,
+            "steals": steals,
+            "blocks": blocks,
+            "result": "Win" if result == "y" else "Loss",
+        })
+
+    def total_stat(self, statistic):
+        return sum(game[statistic] for game in self.__game_stats)
+
     def __len__(self): return len(players)
     def __iter__(self): return iter(players)
 
@@ -158,8 +178,25 @@ class Statistics:
         print(f"Team: {self.team.name}")
         print(f"Players: {len(self.team)}")
         print(f"Games Played: {self.team.games_played}")
+        print(f"Team Points: {self.team.total_stat('team_score')}")
+        print(f"Opponent Points: {self.team.total_stat('opponent_score')}")
         for statistic in ("points", "assists", "rebounds", "steals", "blocks"):
             print(f"{statistic.title()}: {sum(getattr(p, statistic) for p in self.team)}")
+        for statistic in ("assists", "rebounds", "steals", "blocks"):
+            print(f"Team {statistic.title()}: {self.team.total_stat(statistic)}")
+
+    def team_game_statistics(self):
+        print("\nTeam Game Statistics")
+        if not self.team.game_stats:
+            print("No team games have been recorded.")
+            return
+        for number, game in enumerate(self.team.game_stats, 1):
+            print(f"\nGame {number}: {game['result']}")
+            print(f"Score: {game['team_score']} - {game['opponent_score']}")
+            print(f"Assists: {game['assists']}")
+            print(f"Rebounds: {game['rebounds']}")
+            print(f"Steals: {game['steals']}")
+            print(f"Blocks: {game['blocks']}")
 
     def get_leader(self, statistic):
         return max(self.team, key=lambda p: getattr(p, statistic), default=None)
@@ -182,14 +219,15 @@ class Statistics:
             "9": self.player_averages,
             "10": self.player_statistics,
             "11": self.team_record,
+            "12": self.team_game_statistics,
         }
         while True:
             print("\nStatistics\n1. Team Overview\n2. Scoring Leader\n3. Assist Leader")
             print("4. Rebound Leader\n5. Steals Leader\n6. Blocks Leader")
             print("7. Top 3 Scorers\n8. Top 3 Assist Leaders\n9. Player Averages")
-            print("10. Player Statistics\n11. Team Record\n12. Back")
+            print("10. Player Statistics\n11. Team Record\n12. Team Game Statistics\n13. Back")
             choice = input("\nChoose an option: ")
-            if choice == "12": return
+            if choice == "13": return
             if choice in actions: actions[choice]()
             else: print("Invalid option.")
 
@@ -307,19 +345,34 @@ def delete_player(team):
 
 @player_required
 def record_game(team):
-    result = input("\nDid the team win? (y/n): ").strip().lower()
-    if result == "y": team.record_win()
-    elif result == "n": team.record_loss()
-    else:
+    print("\nRecord Game")
+    result = input("Did the team win? (y/n): ").strip().lower()
+    if result not in ("y", "n"):
         print("Invalid result.")
         return
+
+    team_score = get_integer("Team score: ")
+    opponent_score = get_integer("Opponent score: ")
+    team_values = [get_integer(label) for label in (
+        "Team assists: ", "Team rebounds: ", "Team steals: ", "Team blocks: ")]
+
+    entered_values = [team_score, opponent_score] + team_values
+    if any(value < 0 for value in entered_values):
+        print("Team statistics cannot be negative.")
+        return
+
+    player_values = []
     for player in team:
         print(f"\n{player.name}")
         values = [get_integer(label) for label in ("Points: ", "Assists: ", "Rebounds: ", "Steals: ", "Blocks: ")]
-        try: player.record_game(*values)
-        except ValueError as error:
-            print(error)
+        if any(value < 0 for value in values):
+            print("Player statistics cannot be negative.")
             return
+        player_values.append((player, values))
+
+    team.record_game(result, team_score, opponent_score, *team_values)
+    for player, values in player_values:
+        player.record_game(*values)
     print("\nGame recorded successfully.")
 
 
