@@ -137,9 +137,16 @@ class PlayerProxy:
             ("ID", player.player_id), ("Name", player.name),
             ("Age", player.age), ("Position", player.position),
             ("Jersey Number", player.jersey_number), ("Games", player.games),
-            ("Points", player.points), ("Assists", player.assists),
-            ("Rebounds", player.rebounds), ("Steals", player.steals),
-            ("Blocks", player.blocks)):
+            ("Total Points", player.points),
+            ("Average Points Per Game", f"{player.points_per_game:.2f}"),
+            ("Total Assists", player.assists),
+            ("Average Assists Per Game", f"{player.assists_per_game:.2f}"),
+            ("Total Rebounds", player.rebounds),
+            ("Average Rebounds Per Game", f"{player.rebounds_per_game:.2f}"),
+            ("Total Steals", player.steals),
+            ("Average Steals Per Game", f"{player.steals_per_game:.2f}"),
+            ("Total Blocks", player.blocks),
+            ("Average Blocks Per Game", f"{player.blocks_per_game:.2f}")):
             print(f"{label}: {value}")
 
 
