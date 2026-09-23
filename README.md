@@ -1,6 +1,7 @@
+<img width="1190" height="650" alt="WIN_20260923_18_15_10_Pro" src="https://github.com/user-attachments/assets/2a61ecdb-dfdd-4d31-8e68-93a193bf851b" />
  Basketball Team Management System
 
-A Python-based basketball team management system for managing players, recording games, and analyzing team and player statistics.
+A Python-based basketball team management system for managing players, recording games, and analyzing team and player statistics built by a 11 year old.
 
 This project was built to practice Object-Oriented Programming, argument parsing, decorators, design patterns, generators, , and Python's special methods in a practical application.
 
@@ -114,5 +115,8 @@ BPG: 0.90
 Possible improvements for future versions:
  Add team roster limits,
  add multiple teams and
- add a graphical user interface
+ add a graphical user interface.
+ Please note: This project does NOT use AI
+ 
+ -Aarsh Anand
 
