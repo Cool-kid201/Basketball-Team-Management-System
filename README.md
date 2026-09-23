@@ -1,26 +1,26 @@
-🏀 Basketball Team Management System
+ Basketball Team Management System
 
 A Python-based basketball team management system for managing players, recording games, and analyzing team and player statistics.
 
 This project was built to practice Object-Oriented Programming, argument parsing, decorators, design patterns, generators, , and Python's special methods in a practical application.
 
-✨ Features
-👤 Add, view, edit, and remove players
-🔎 Search players by name or position
-🏀 Record games and player statistics
-📊 View team statistics
-🏆 Track team wins and losses
-📈 Calculate team win percentage
-⭐ Find scoring, assist, rebound, steal, and block leaders
-🥇 Display top 3 scorers
-🎯 Display top 3 assist leaders
-📋 View individual player statistics
-📊 Calculate player averages:
-Points per game (PPG)
-Assists per game (APG)
-Rebounds per game (RPG)
-Steals per game (SPG)
-Blocks per game (BPG)
+ Features
+1. Add, view, edit, and remove players
+2. Search players by name or position
+3. Record games and player statistics
+4. View team statistics
+5. Track team wins and losses
+6. Calculate team win percentage
+7. Find scoring, assist, rebound, steal, and block leaders
+8. Display top 3 scorers
+9. Display top 3 assist leaders
+10. View individual player statistics
+11. Calculate player averages:
+ Points per game (PPG), 
+b. Assists per game (APG),
+-Rebounds per game (RPG),
+-Steals per game (SPG) and
+-Blocks per game (BPG)
 Concepts Applied:
 
 Object-Oriented Programming
@@ -59,7 +59,7 @@ These allow objects to behave naturally with Python operations such as:
 
 
 
-🎮 Main Menu
+ Main Menu
 
 The application provides the following options:
 
@@ -89,7 +89,7 @@ The Statistics menu provides:
 12. Back
 
 
-📊 Example
+ Example
 
 A player can have statistics such as:
 
